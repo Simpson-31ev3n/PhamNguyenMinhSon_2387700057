@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+import os, re, subprocess, sys, stat, platform
+from datetime import datetime
+
+LOG_FILE = "gitsecure.log"
+SENSITIVE_PATTERNS = [
+    r"(apikey)\s*[:=]\s*['\"][A-Za-z0-9_-]{16,}['\"]",
+    r"(secret)\s*[:=]\s*['\"][A-Za-z0-9_\-]{8,}['\"]",
+    r"(password)\s*[:=]\s*['\"][^'\"\s]{4,}['\"]",
+    r"(token)\s*[:=]\s*['\"][A-Za-z0-9_\-]{10,}['\"]",
+    r"(AKIA|ASIA)[A-Z0-9]{16}"
+]
+
+def log(msg):
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(f"[{datetime.now()}] {msg}\n")
+
+def scan_sensitive(file_path):
+    # Bỏ qua tài liệu markdown và thư mục unit test chuyên dụng
+    normalized_path = file_path.replace("\\", "/")
+    if normalized_path.endswith((".md", ".markdown")) or "/tests/" in normalized_path:
+        return None
+    try:
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+            for pattern in SENSITIVE_PATTERNS:
+                if re.search(pattern, content, re.IGNORECASE):
+                    return f"Sensitive info found in {file_path}: pattern {pattern}"
+    except Exception:
+        return None
+    return None
+
+def check_permissions(file_path):
+    if platform.system() == "Windows":
+        return None
+    try:
+        st = os.stat(file_path)
+        if st.st_mode & stat.S_IWOTH:
+            return f"File {file_path} is world-writable!"
+    except Exception:
+        return None
+    return None
+
+RESTRICTED_LICENSES = [
+    r"GNU (General|Affero General) Public License",
+    r"\bGPL(-?[23](\.0)?)?\b",
+    r"\bAGPL(-?[23](\.0)?)?\b",
+    r"Server Side Public License",
+    r"\bSSPL\b"
+]
+
+def check_license(file_path):
+    """Kiểm tra tuân thủ giấy phép: Phát hiện mã nguồn/thư viện chứa giấy phép hạn chế (Copyleft / GPL / AGPL)."""
+    if not file_path.endswith((".py", "requirements.txt")):
+        return None
+    try:
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+            for pattern in RESTRICTED_LICENSES:
+                if re.search(pattern, content, re.IGNORECASE):
+                    return f"License compliance issue in {file_path}: Found restricted license pattern '{pattern}'"
+    except Exception:
+        return None
+    return None
+
+def run_bandit():
+    try:
+        result = subprocess.run(["bandit", "-r", "."], capture_output=True, text=True)
+        if "SEVERITY: High" in result.stdout:
+            log("Bandit: High severity issues found!")
+            return "Bandit: High severity issues found."
+    except FileNotFoundError:
+        return None  # Bandit optional if not installed
+    return None
+
+def main():
+    findings = []
+    try:
+        files = subprocess.check_output(["git", "diff", "--cached", "--name-only"], stderr=subprocess.DEVNULL).decode().splitlines()
+    except Exception:
+        files = []
+
+    for file in files:
+        if not os.path.isfile(file):
+            continue
+        result = scan_sensitive(file)
+        if result:
+            findings.append(result)
+        perms = check_permissions(file)
+        if perms:
+            findings.append(perms)
+        license_result = check_license(file)
+        if license_result:
+            findings.append(license_result)
+
+    bandit_result = run_bandit()
+    if bandit_result:
+        findings.append(bandit_result)
+
+    if findings:
+        print("\nCOMMIT BLOCKED by GitSecure:")
+        for f in findings:
+            print(" -", f)
+            log(f)
+        sys.exit(1)
+    else:
+        print("GitSecure: All checks passed.")
+
+if __name__ == "__main__":
+    main()
