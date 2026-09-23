@@ -112,3 +112,31 @@ curl -X POST http://127.0.0.1:5000/validate \
      }'
 ```
 Sau đó kiểm tra nội dung file `secure.log` (xem email đã bị che thành `<email_masked>`) và file `secure.log.sig` (chứa chuỗi băm đối soát SHA-256).
+
+---
+
+## 6. Kết quả log thực thi thực tế (Actual Execution Logs)
+
+### 6.1. Log chạy Unit Test & API Test (`python -m unittest -v tests/test_logger.py`)
+```text
+test_api_validate (tests.test_logger.TestSecureLogger.test_api_validate) ... ok
+test_hash_sha256 (tests.test_logger.TestSecureLogger.test_hash_sha256) ... ok
+test_mask_pii_email (tests.test_logger.TestSecureLogger.test_mask_pii_email) ... ok
+test_mask_pii_password (tests.test_logger.TestSecureLogger.test_mask_pii_password) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.689s
+
+OK
+```
+
+### 6.2. Bản ghi nhật ký thực tế trong tệp `secure.log` (Che PII `<email_masked>`)
+```json
+{"timestamp": "2026-09-23T14:49:57.972882Z", "level": "INFO", "message": "Validation check performed", "data": "{'email': '<email_masked>', 'filename': 'report.pdf', 'html': '<script>alert(1)</script>', 'sql': \"' OR 1=1 --\", 'url': 'https://secure.com'}", "results": "{'email': True, 'url': True, 'filename': True, 'sql': '1=1', 'html': '&lt;script&gt;alert(1)&lt;/script&gt;'}"}
+```
+
+### 6.3. Chữ ký băm toàn vẹn trong tệp `secure.log.sig` (SHA-256 đối soát)
+```text
+ad00b4c6855ff5d95f52ad4d2f55edab998eb460a4ae5d7acdb662067000015a
+```
+

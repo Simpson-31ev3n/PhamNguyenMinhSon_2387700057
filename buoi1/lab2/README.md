@@ -110,3 +110,39 @@ git commit -m "Test GitSecure Block"
 # 4. Kiểm tra file nhật ký ghi nhận vi phạm
 cat gitsecure.log
 ```
+
+---
+
+## 6. Kết quả log thực thi thực tế (Actual Execution Logs)
+
+### 6.1. Log terminal khi chặn commit chứa Secret cứng (`bad.py`)
+```text
+$ git add buoi1/lab2/pre-commit-hook-test/bad.py
+$ git commit -m "Test GitSecure Block"
+
+COMMIT BLOCKED by GitSecure:
+ - Sensitive info found in buoi1/lab2/pre-commit-hook-test/bad.py: pattern (password)\s*[:=]\s*['\"][^'\"\s]{4,}['\"]
+```
+
+### 6.2. Log terminal khi chặn file vi phạm bản quyền (Restricted License - GPL/AGPL)
+```text
+$ git add license_test.py
+$ git commit -m "Test License Violation"
+
+COMMIT BLOCKED by GitSecure:
+ - License compliance issue in license_test.py: Found restricted license pattern '\bGPL(-?[23](\.0)?)?\b'
+```
+
+### 6.3. Log terminal khi mã nguồn hợp lệ vượt qua toàn bộ kiểm tra
+```text
+$ git commit -m "Valid commit without secrets"
+GitSecure: All checks passed.
+```
+
+### 6.4. Nội dung nhật ký ghi nhận trong tệp `gitsecure.log`
+```text
+[2026-09-23 21:21:23.153765] Sensitive info found in buoi1/lab2/pre-commit-hook-test/bad.py: pattern (password)\s*[:=]\s*['\"][^'\"\s]{4,}['\"]
+[2026-09-23 21:24:19.525806] Sensitive info found in buoi1/lab2/pre-commit-hook-test/bad.py: pattern (password)\s*[:=]\s*['\"][^'\"\s]{4,}['\"]
+[2026-09-23 21:24:19.526164] License compliance issue in license_test.py: Found restricted license pattern '\bGPL(-?[23](\.0)?)?\b'
+```
+

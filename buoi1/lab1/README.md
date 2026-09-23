@@ -93,3 +93,38 @@ pip install -r requirements.txt
 python app.py
 ```
 Truy cập giao diện tại: `http://127.0.0.1:5000/` để thử nghiệm trực tiếp các payload.
+
+---
+
+## 5. Kết quả log thực thi thực tế (Actual Execution Logs)
+
+### 5.1. Log chạy Unit Test (`python -m unittest -v tests/test_validators.py`)
+```text
+test_sanitize_html_input_safe_text (tests.test_validators.TestValidators.test_sanitize_html_input_safe_text) ... ok
+test_sanitize_html_input_script (tests.test_validators.TestValidators.test_sanitize_html_input_script) ... ok
+test_sanitize_sql_input_injection (tests.test_validators.TestValidators.test_sanitize_sql_input_injection) ... ok
+test_sanitize_sql_input_safe_text (tests.test_validators.TestValidators.test_sanitize_sql_input_safe_text) ... ok
+test_validate_email_invalid (tests.test_validators.TestValidators.test_validate_email_invalid) ... ok
+test_validate_email_valid (tests.test_validators.TestValidators.test_validate_email_valid) ... ok
+test_validate_filename_traversal (tests.test_validators.TestValidators.test_validate_filename_traversal) ... ok
+test_validate_filename_valid (tests.test_validators.TestValidators.test_validate_filename_valid) ... ok
+test_validate_url_invalid (tests.test_validators.TestValidators.test_validate_url_invalid) ... ok
+test_validate_url_valid (tests.test_validators.TestValidators.test_validate_url_valid) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.002s
+
+OK
+```
+
+### 5.2. Log kết quả xử lý dữ liệu của các hàm trong `securevalidator`:
+```json
+{
+  "email": "user@example.com -> Valid: true",
+  "url": "https://google.com -> Valid: true",
+  "filename_traversal": "../../etc/passwd -> Valid: false",
+  "sql_sanitized": "' OR 1=1 -- -> Output: '1=1'",
+  "html_sanitized": "<script>alert(1)</script> -> Output: '&lt;script&gt;alert(1)&lt;/script&gt;'"
+}
+```
+
