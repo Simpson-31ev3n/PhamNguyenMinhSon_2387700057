@@ -8,6 +8,6 @@ Repository lưu trữ mã nguồn và báo cáo các bài thực hành trên l�
 ## Danh sách bài thực hành
 
 - [Buổi 1: Cơ sở lập trình bảo mật và kiểm tra đầu vào](./buoi1/README.md)
-  - Lab 1: Kiểm tra và làm sạch dữ liệu đầu vào (Input Validation & Sanitization)
-  - Lab 2: Cấu hình Git Pre-commit Hook quét rò rỉ thông tin nhạy cảm
-  - Lab 3: Xây dựng hệ thống Secure Logger bảo mật nhật ký ứng dụng
+  - [Lab 1: Kiểm tra và làm sạch dữ liệu đầu vào (Input Validation & Sanitization)](./buoi1/lab1/README.md)
+  - [Lab 2: Cấu hình Git Pre-commit Hook quét rò rỉ thông tin nhạy cảm](./buoi1/lab2/README.md)
+  - [Lab 3: Xây dựng hệ thống Secure Logger bảo mật nhật ký ứng dụng](./buoi1/lab3/README.md)
