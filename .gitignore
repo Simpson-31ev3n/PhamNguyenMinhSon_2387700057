@@ -3,11 +3,13 @@ venv/
 env/
 .env
 
-# Python cache
+# Python cache & packaging
 __pycache__/
 *.py[cod]
 *$py.class
 *.pyc
+*.egg-info/
+.pytest_cache/
 
 # IDEs / OS files
 .vscode/
@@ -25,3 +27,10 @@ secure.log
 secure.log.*
 secure.log.sig
 
+# Buoi 2 - Runtime Generated Certs & Encrypted files (GitSecure requirement)
+certs/
+*.pem
+buoi2/lab1/securecrypto/upload/
+buoi2/lab1/files/*.enc
+buoi2/lab1/files/*.dec
+buoi2/lab2/certs/

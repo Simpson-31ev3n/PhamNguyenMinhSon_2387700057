@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Certs (runtime generated)
+certs/
+*.pem
+
+# OS
+.DS_Store
+gitsecure.log
