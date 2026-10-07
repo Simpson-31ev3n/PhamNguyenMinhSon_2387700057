@@ -1,0 +1,5 @@
+gitsecure.log
+certs/
+*.pem
+.env
+~$*
